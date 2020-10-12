@@ -35,7 +35,7 @@
 			height: 50px;
 			padding: 0 50px;
 		}
-		.r-e .r-e-editor-bar .r-e-editor-bar-options {
+		.r-e .r-e-editor-bar-options {
 			list-style: none;
 			padding: 0;
 			display: flex;
@@ -54,6 +54,12 @@
 		.r-e .r-e-editor-bar .r-e-editor-bar-options .r-e-editor-bar-option button.active {
 			color: blue;
 		}
+		/**/
+		.r-e .r-e-editor-bar-floatin {
+			box-sizing: border-box;
+			width: 100%;
+			height: 50px;
+		}
 	</style>
 </head>
 <body>
@@ -68,6 +74,8 @@
 		constructor( settings ) {
 			// 
 			this.$el = settings.$el;
+			// 
+			this.$editor = document.createElement('div');
 			// 
 			this.allOptions = [{
 				text: 'Superscript',
@@ -144,8 +152,18 @@
 			}];
 			// 
 			this.convert();
-			// 
-			this.detectOptions();
+			// listen for selection changes
+			document.addEventListener('selectionchange', () => {
+				// 
+				clearTimeout(this.delay);
+				// 
+				this.delay = setTimeout(()=>{
+					// 
+					this.selectActiveOptions();
+					// 
+					this.showFloatingBar();
+				},100);
+			});
 		}
 
 		//
@@ -153,18 +171,18 @@
 			// get objects
 			let $elParent = this.$el.parentNode;
 			let $wrapper = document.createElement('div');
-			let $editor = document.createElement('div');
 			let $editorBar = document.createElement('div');
 			// create editor bar
 			$wrapper.appendChild($editorBar);
 			$editorBar.classList.add('r-e-editor-bar');
-			this.addOptionsToBar($editorBar);
+			// 
+			$editorBar.appendChild(this.getOptions());
 			// create editor
-			$editor.innerHTML = this.$el.innerHTML;
-			$wrapper.appendChild($editor);
-			$editor.classList.add('r-e-editor');
-			$editor.id = 'r-e-editor';
-			$editor.setAttribute('contenteditable',true);
+			this.$editor.innerHTML = this.$el.innerHTML;
+			$wrapper.appendChild(this.$editor);
+			this.$editor.classList.add('r-e-editor');
+			this.$editor.id = 'r-e-editor';
+			this.$editor.setAttribute('contenteditable',true);
 			// crete wrapper
 			$wrapper.classList.add('r-e');
 			$wrapper.appendChild(this.$el);
@@ -175,11 +193,10 @@
 		}
 
 		// 
-		addOptionsToBar( $editorBar ) {
+		getOptions() {
 			// 
 			const $options = document.createElement('ul');
 			$options.classList.add('r-e-editor-bar-options');
-
 			// 
 			for ( let i = 0; i < this.allOptions.length; i++ ) {
 				// 
@@ -209,42 +226,87 @@
 				$options.appendChild($option);
 			}
 			// 
-			$editorBar.appendChild($options);
+			return $options;
 		}
 
 		// 
-		detectOptions() {
-			// listen for selection changes
-			document.addEventListener('selectionchange', () => {
+		selectActiveOptions() {
+			// 
+			let editorTags = {};
+			// 
+			for ( let i = 0; i < this.allOptions.length; i++ ) {
 				// 
-				clearTimeout(this.delay);
+				if ( this.allOptions[i].tag == '' ) continue;
+				this.allOptions[i].$button.classList.remove('active');
 				// 
-				this.delay = setTimeout(()=>{
+				editorTags[this.allOptions[i].tag] = document.getElementsByTagName(this.allOptions[i].tag);
+				// 
+				for (let tag of editorTags[this.allOptions[i].tag]) {
 					// 
-					let editorTags = {};
+					const selection = window.getSelection();
+					var range = selection.getRangeAt(0);
+					var bool = range.intersectsNode(tag);
 					// 
-					for ( let i = 0; i < this.allOptions.length; i++ ) {
-						// 
-						if ( this.allOptions[i].tag == '' ) continue;
+					if ( bool ) {
+						this.allOptions[i].$button.classList.add('active');
+					} else {
 						this.allOptions[i].$button.classList.remove('active');
-						// 
-						editorTags[this.allOptions[i].tag] = document.getElementsByTagName(this.allOptions[i].tag);
-						// 
-						for (let tag of editorTags[this.allOptions[i].tag]) {
-							// 
-							const selection = window.getSelection();
-							var range = selection.getRangeAt(0);
-							var bool = range.intersectsNode(tag);
-							// 
-							if ( bool ) {
-								this.allOptions[i].$button.classList.add('active');
-							} else {
-								this.allOptions[i].$button.classList.remove('active');
-							}
-						}
 					}
-				},100) 
-			});
+				}
+			}
+		}
+
+		//
+		showFloatingBar() {
+			//
+			let $floatingBar = document.getElementById('floatingBarOffset');
+			// 
+			const coordinates = getSelectionCoordinates();
+			// 
+			if ( !$floatingBar ) {
+				$floatingBar = document.createElement('div');
+				$floatingBar.id = 'floatingBar';
+				$floatingBar.style.position = 'absolute';
+				$floatingBar.appendChild(this.getOptions());
+				$floatingBar.classList.add('r-e-editor-bar-floatin');
+				this.$editor.appendChild($floatingBar);
+			}
+			// 
+			$floatingBar.style.top = coordinates.top+'px';
+			$floatingBar.style.left = coordinates.left+'px';
+			// 
+
+			/**
+			 *
+			 */
+			function getSelectionCoordinates() {
+				//
+				let $anchore = document.getElementById('floatingBarOffset');
+				// 
+				if ( !$anchore ) {
+					//
+					$anchore = document.createElement('a');
+					// 
+					$anchore.id = 'floatingBarOffset';
+				}
+				// 
+				window.getSelection().getRangeAt(0).insertNode($anchore);
+				// 
+				return getOffset($anchore);
+			}
+
+			/**
+			 *
+			 */
+			function getOffset( el ) {
+				// 
+				const rect = el.getBoundingClientRect();
+				// 
+				return {
+					left: rect.left + window.scrollX,
+					top: rect.top + window.scrollY
+				};
+			}
 		}
 	}
 
