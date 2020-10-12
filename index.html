@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		body {
+			margin: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100vw;
+			height: 100vh;
+		}
+		[contenteditable]:focus {
+			outline: 0px solid transparent;
+		}
+
+		.r-e {
+			width: 100%;
+			height: 100%;
+		}
+		.r-e .r-e-editor {
+			box-sizing: border-box;
+			padding: 0 50px 50px 50px;
+			width: 100%;
+			height: calc(100% - 50px);
+		}
+		.r-e .r-e-original {
+			display: none;
+		}
+		/**/
+		.r-e .r-e-editor-bar {
+			box-sizing: border-box;
+			width: 100%;
+			height: 50px;
+			padding: 0 50px;
+		}
+		.r-e .r-e-editor-bar .r-e-editor-bar-options {
+			list-style: none;
+			padding: 0;
+			display: flex;
+			align-items: center;
+		}
+		.r-e .r-e-editor-bar .r-e-editor-bar-options .r-e-editor-bar-option {
+			margin-left: 5px;
+			cursor: pointer;
+		}
+		.r-e .r-e-editor-bar .r-e-editor-bar-options .r-e-editor-bar-option button {
+			background-color: transparent;
+			outline: solid 0px #fff;
+			border: solid 0px #fff;
+			cursor: pointer;
+		}
+		.r-e .r-e-editor-bar .r-e-editor-bar-options .r-e-editor-bar-option button.active {
+			color: blue;
+		}
+	</style>
+</head>
+<body>
+	<textarea id="app">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</textarea>
+
+</body>
+
+<script type="text/javascript">
+	class richEditor {
+
+		// 
+		constructor( settings ) {
+			// 
+			this.$el = settings.$el;
+			// 
+			this.allOptions = [{
+				text: 'Superscript',
+				tag: 'sup',
+				action: ( selectedText ) => {
+					// 
+					let $el = document.createElement('sup');
+					// 
+					$el.innerHTML = selectedText;
+					// 
+					return $el;
+				}
+			},{
+				text: 'Subscript',
+				tag: 'sub',
+				action: ( selectedText ) => {
+					// 
+					let $el = document.createElement('sub');
+					// 
+					$el.innerHTML = selectedText;
+					// 
+					return $el;
+				}
+			},{
+				text: 'Italic',
+				tag: 'i',
+				action: ( selectedText ) => {
+					// 
+					let $el = document.createElement('i');
+					// 
+					$el.innerHTML = selectedText;
+					// 
+					return $el;
+				}
+			},{
+				text: 'Bold',
+				tag: 'b',
+				action: ( selectedText ) => {
+					// 
+					let $el = document.createElement('b');
+					// 
+					$el.innerHTML = selectedText;
+					// 
+					return $el;
+				}
+			},{
+				text: 'Underline',
+				tag: 'u',
+				action: ( selectedText ) => {
+					// 
+					let $el = document.createElement('u');
+					// 
+					$el.innerHTML = selectedText;
+					// 
+					return $el;
+				},
+			},{
+				text: 'Strikethrough',
+				tag: 's',
+				action: ( selectedText ) => {
+					// 
+					let $el = document.createElement('s');
+					// 
+					$el.innerHTML = selectedText;
+					// 
+					return $el;
+				}
+			},{
+				text: 'Clear Format',
+				tag: '',
+				action: ( selectedText ) => {
+					return document.createTextNode(selectedText);
+				}
+			}];
+			// 
+			this.convert();
+			// 
+			this.detectOptions();
+		}
+
+		//
+		convert() {
+			// get objects
+			let $elParent = this.$el.parentNode;
+			let $wrapper = document.createElement('div');
+			let $editor = document.createElement('div');
+			let $editorBar = document.createElement('div');
+			// create editor bar
+			$wrapper.appendChild($editorBar);
+			$editorBar.classList.add('r-e-editor-bar');
+			this.addOptionsToBar($editorBar);
+			// create editor
+			$editor.innerHTML = this.$el.innerHTML;
+			$wrapper.appendChild($editor);
+			$editor.classList.add('r-e-editor');
+			$editor.id = 'r-e-editor';
+			$editor.setAttribute('contenteditable',true);
+			// crete wrapper
+			$wrapper.classList.add('r-e');
+			$wrapper.appendChild(this.$el);
+			// hide original element
+			this.$el.classList.add('r-e-original');
+			// append wrapper
+			$elParent.appendChild($wrapper);
+		}
+
+		// 
+		addOptionsToBar( $editorBar ) {
+			// 
+			const $options = document.createElement('ul');
+			$options.classList.add('r-e-editor-bar-options');
+
+			// 
+			for ( let i = 0; i < this.allOptions.length; i++ ) {
+				// 
+				let $option = document.createElement('li');
+				this.allOptions[i].$button = document.createElement('button');
+				this.allOptions[i].$button.innerHTML = this.allOptions[i].text;
+				$option.setAttribute('data-index',i);
+
+				$option.classList.add('r-e-editor-bar-option');
+				// 
+				this.allOptions[i].$button.addEventListener('click', ( event ) => {
+					// 
+					let sel, range;
+					let index = event.target.parentNode.getAttribute('data-index');
+					sel = window.getSelection();
+					let text = sel.toString();
+					// 
+					if ( sel.rangeCount ) {
+						range = sel.getRangeAt(0);
+						range.deleteContents();
+						// 
+						range.insertNode(this.allOptions[index].action(text));
+					}
+				});
+				// 
+				$option.appendChild(this.allOptions[i].$button);
+				$options.appendChild($option);
+			}
+			// 
+			$editorBar.appendChild($options);
+		}
+
+		// 
+		detectOptions() {
+			// listen for selection changes
+			document.addEventListener('selectionchange', () => {
+				// 
+				clearTimeout(this.delay);
+				// 
+				this.delay = setTimeout(()=>{
+					// 
+					let editorTags = {};
+					// 
+					for ( let i = 0; i < this.allOptions.length; i++ ) {
+						// 
+						if ( this.allOptions[i].tag == '' ) continue;
+						this.allOptions[i].$button.classList.remove('active');
+						// 
+						editorTags[this.allOptions[i].tag] = document.getElementsByTagName(this.allOptions[i].tag);
+						// 
+						for (let tag of editorTags[this.allOptions[i].tag]) {
+							// 
+							const selection = window.getSelection();
+							var range = selection.getRangeAt(0);
+							var bool = range.intersectsNode(tag);
+							// 
+							if ( bool ) {
+								this.allOptions[i].$button.classList.add('active');
+							} else {
+								this.allOptions[i].$button.classList.remove('active');
+							}
+						}
+					}
+				},100) 
+			});
+		}
+	}
+
+	const re = new richEditor({
+		$el: document.querySelector('#app')
+	});
+</script>
+</html>
