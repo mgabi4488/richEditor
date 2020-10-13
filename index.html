@@ -266,10 +266,21 @@
 
 		//
 		showFloatingBar() {
+			// 
+			let slection = window.getSelection();
 			//
 			let $floatingBar = document.getElementById('floatingBar');
 			// 
-			const coordinates = getSelectionCoordinates();
+			if ( slection.toString().length == 0 && $floatingBar ) {
+				// 
+				$floatingBar.remove();
+				// 
+				return;
+			} else if ( slection.toString().length == 0 ) {
+				return;
+			}
+			// 
+			const coordinates = getSelectionCoordinates(slection);
 			// 
 			if ( !$floatingBar ) {
 				$floatingBar = document.createElement('div');
@@ -286,10 +297,9 @@
 			/**
 			 *
 			 */
-			function getSelectionCoordinates() {
+			function getSelectionCoordinates( slection ) {
 				//
 				let $anchore = document.getElementById('floatingBarOffset');
-				let slection = window.getSelection();
 				// 
 				if ( !$anchore ) {
 					//
