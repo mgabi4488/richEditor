@@ -35,30 +35,38 @@
 			height: 50px;
 			padding: 0 50px;
 		}
-		.r-e .r-e-editor-bar-options {
+		.r-e-editor-bar-options {
 			list-style: none;
 			padding: 0;
 			display: flex;
 			align-items: center;
 		}
-		.r-e .r-e-editor-bar .r-e-editor-bar-options .r-e-editor-bar-option {
+		.r-e-editor-bar-options .r-e-editor-bar-option {
 			margin-left: 5px;
 			cursor: pointer;
 		}
-		.r-e .r-e-editor-bar .r-e-editor-bar-options .r-e-editor-bar-option button {
+		.r-e-editor-bar-options .r-e-editor-bar-option button {
 			background-color: transparent;
 			outline: solid 0px #fff;
 			border: solid 0px #fff;
 			cursor: pointer;
+			font-weight: inherit;
 		}
-		.r-e .r-e-editor-bar .r-e-editor-bar-options .r-e-editor-bar-option button.active {
+		.r-e-editor-bar-options .r-e-editor-bar-option button.active {
 			color: blue;
 		}
 		/**/
-		.r-e .r-e-editor-bar-floatin {
+		.r-e-editor-bar-floatin {
 			box-sizing: border-box;
 			width: 100%;
 			height: 50px;
+			background-color: #fff;
+			font-weight: bold;
+			box-shadow: 0 0 20px 1px #00000030;
+			position: absolute;
+		    display: flex;
+		    width: auto;
+		    padding: 0 10px;
 		}
 	</style>
 </head>
@@ -259,21 +267,20 @@
 		//
 		showFloatingBar() {
 			//
-			let $floatingBar = document.getElementById('floatingBarOffset');
+			let $floatingBar = document.getElementById('floatingBar');
 			// 
 			const coordinates = getSelectionCoordinates();
 			// 
 			if ( !$floatingBar ) {
 				$floatingBar = document.createElement('div');
 				$floatingBar.id = 'floatingBar';
-				$floatingBar.style.position = 'absolute';
 				$floatingBar.appendChild(this.getOptions());
 				$floatingBar.classList.add('r-e-editor-bar-floatin');
-				this.$editor.appendChild($floatingBar);
+				document.body.appendChild($floatingBar);
 			}
 			// 
-			$floatingBar.style.top = coordinates.top+'px';
-			$floatingBar.style.left = coordinates.left+'px';
+			$floatingBar.style.top = (coordinates.top + 20) + 'px';
+			$floatingBar.style.left = coordinates.left + 'px';
 			// 
 
 			/**
@@ -282,6 +289,7 @@
 			function getSelectionCoordinates() {
 				//
 				let $anchore = document.getElementById('floatingBarOffset');
+				let slection = window.getSelection();
 				// 
 				if ( !$anchore ) {
 					//
@@ -290,7 +298,7 @@
 					$anchore.id = 'floatingBarOffset';
 				}
 				// 
-				window.getSelection().getRangeAt(0).insertNode($anchore);
+				slection.getRangeAt(0).insertNode($anchore);
 				// 
 				return getOffset($anchore);
 			}
