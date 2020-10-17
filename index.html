@@ -64,14 +64,14 @@
 			font-weight: bold;
 			box-shadow: 0 0 20px 1px #00000030;
 			position: absolute;
-		    display: flex;
-		    width: auto;
-		    padding: 0 10px;
+			display: flex;
+			width: auto;
+			padding: 0 10px;
 		}
 	</style>
 </head>
 <body>
-	<textarea id="app">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</textarea>
+	<textarea id="app">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.<br> It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</textarea>
 
 </body>
 
@@ -80,6 +80,7 @@
 
 		// 
 		constructor( settings ) {
+document.execCommand('defaultParagraphSeparator', false, 'p');
 			// 
 			this.$el = settings.$el;
 			// 
@@ -88,74 +89,147 @@
 			this.allOptions = [{
 				text: 'Superscript',
 				tag: 'sup',
-				action: ( selectedText ) => {
+				action: () => {
 					// 
-					let $el = document.createElement('sup');
+					let selection = window.getSelection();
+					let range;
+					let documentFragment;
+					let newNode = document.createElement('sup');
 					// 
-					$el.innerHTML = selectedText;
-					// 
-					return $el;
+					if ( selection.rangeCount ) {
+						// 
+						range = selection.getRangeAt(0);
+						// 
+						documentFragment = range.extractContents();
+						// 
+						newNode.appendChild(documentFragment);
+						//
+						range.insertNode(newNode);
+					}
 				}
 			},{
 				text: 'Subscript',
 				tag: 'sub',
-				action: ( selectedText ) => {
+				action: () => {
 					// 
-					let $el = document.createElement('sub');
+					let selection = window.getSelection();
+					let range;
+					let documentFragment;
+					let newNode = document.createElement('sub');
 					// 
-					$el.innerHTML = selectedText;
-					// 
-					return $el;
+					if ( selection.rangeCount ) {
+						// 
+						range = selection.getRangeAt(0);
+						// 
+						documentFragment = range.extractContents();
+						// 
+						newNode.appendChild(documentFragment);
+						//
+						range.insertNode(newNode);
+					}
 				}
 			},{
 				text: 'Italic',
 				tag: 'i',
-				action: ( selectedText ) => {
+				action: () => {
 					// 
-					let $el = document.createElement('i');
+					let selection = window.getSelection();
+					let range;
+					let documentFragment;
+					let newNode = document.createElement('i');
 					// 
-					$el.innerHTML = selectedText;
-					// 
-					return $el;
+					if ( selection.rangeCount ) {
+						// 
+						range = selection.getRangeAt(0);
+						// 
+						documentFragment = range.extractContents();
+						// 
+						newNode.appendChild(documentFragment);
+						//
+						range.insertNode(newNode);
+					}
 				}
 			},{
 				text: 'Bold',
 				tag: 'b',
-				action: ( selectedText ) => {
+				action: () => {
 					// 
-					let $el = document.createElement('b');
+					let selection = window.getSelection();
+					let range;
+					let documentFragment;
+					let newNode = document.createElement('b');
 					// 
-					$el.innerHTML = selectedText;
-					// 
-					return $el;
+					if ( selection.rangeCount ) {
+						// 
+						range = selection.getRangeAt(0);
+						// 
+						documentFragment = range.extractContents();
+						// 
+						newNode.appendChild(documentFragment);
+						//
+						range.insertNode(newNode);
+					}
 				}
 			},{
 				text: 'Underline',
 				tag: 'u',
-				action: ( selectedText ) => {
+				action: () => {
 					// 
-					let $el = document.createElement('u');
+					let selection = window.getSelection();
+					let range;
+					let documentFragment;
+					let newNode = document.createElement('u');
 					// 
-					$el.innerHTML = selectedText;
-					// 
-					return $el;
+					if ( selection.rangeCount ) {
+						// 
+						range = selection.getRangeAt(0);
+						// 
+						documentFragment = range.extractContents();
+						// 
+						newNode.appendChild(documentFragment);
+						//
+						range.insertNode(newNode);
+					}
 				},
 			},{
 				text: 'Strikethrough',
 				tag: 's',
-				action: ( selectedText ) => {
+				action: () => {
 					// 
-					let $el = document.createElement('s');
+					let selection = window.getSelection();
+					let range;
+					let documentFragment;
+					let newNode = document.createElement('s');
 					// 
-					$el.innerHTML = selectedText;
-					// 
-					return $el;
+					if ( selection.rangeCount ) {
+						// 
+						range = selection.getRangeAt(0);
+						// 
+						documentFragment = range.extractContents();
+						// 
+						newNode.appendChild(documentFragment);
+						//
+						range.insertNode(newNode);
+					}
 				}
 			},{
 				text: 'Clear Format',
 				tag: '',
-				action: ( selectedText ) => {
-					return document.createTextNode(selectedText);
+				action: () => {
+					// 
+					let selection = window.getSelection();
+					let range;
+					let selectedText = window.getSelection().toString();
+					let newNode = document.createTextNode(selectedText);
+					// 
+					if ( selection.rangeCount ) {
+						// 
+						range = selection.getRangeAt(0);
+						//
+						range.deleteContents();
+						// 
+						range.insertNode(newNode);
+					}
 				}
 			}];
 			// 
@@ -186,7 +260,7 @@
 			// 
 			$editorBar.appendChild(this.getOptions());
 			// create editor
-			this.$editor.innerHTML = this.$el.innerHTML;
+			this.$editor.innerHTML = this.$el.value;
 			$wrapper.appendChild(this.$editor);
 			this.$editor.classList.add('r-e-editor');
 			this.$editor.id = 'r-e-editor';
@@ -216,18 +290,13 @@
 				$option.classList.add('r-e-editor-bar-option');
 				// 
 				this.allOptions[i].$button.addEventListener('click', ( event ) => {
-					// 
-					let sel, range;
 					let index = event.target.parentNode.getAttribute('data-index');
-					sel = window.getSelection();
-					let text = sel.toString();
 					// 
-					if ( sel.rangeCount ) {
-						range = sel.getRangeAt(0);
-						range.deleteContents();
-						// 
-						range.insertNode(this.allOptions[index].action(text));
-					}
+					this.saveSelection();
+					// 
+					this.allOptions[index].action();
+					// 
+					this.restoreSelection();
 				});
 				// 
 				$option.appendChild(this.allOptions[i].$button);
@@ -245,6 +314,7 @@
 			for ( let i = 0; i < this.allOptions.length; i++ ) {
 				// 
 				if ( this.allOptions[i].tag == '' ) continue;
+				// 
 				this.allOptions[i].$button.classList.remove('active');
 				// 
 				editorTags[this.allOptions[i].tag] = document.getElementsByTagName(this.allOptions[i].tag);
@@ -326,6 +396,25 @@
 				};
 			}
 		}
+
+		/**
+		 * Save the selection return a 
+		 * `Range` instance if there is a selected text
+		 */
+		saveSelection() {
+			const selection = window.getSelection();
+			this.selecton = selection.rangeCount === 0 ? null : selection.getRangeAt(0);
+		};
+
+		/**
+		 * Restore the selection `range` is a `Range` object
+		 */
+		restoreSelection() {
+			const selection = window.getSelection();
+			selection.removeAllRanges();
+			selection.addRange(this.selecton);
+		};
+
 	}
 
 	const re = new richEditor({
