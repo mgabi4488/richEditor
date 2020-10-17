@@ -1,0 +1,62 @@
+[contenteditable]:focus {
+	outline: 0px solid transparent;
+}
+.r-e {
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	padding: 0 50px 50px 50px;
+}
+.r-e .r-e-editor {
+	width: 100%;
+	height: calc(100% - 50px);
+}
+.r-e .r-e-original {
+	display: none;
+}
+/**/
+.r-e .r-e-editor-bar {
+	width: 100%;
+	height: 50px;
+	display: flex;
+	align-items: center;
+}
+.r-e-editor-bar-options {
+	list-style: none;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	margin: 0;
+}
+.r-e-editor-bar-options .r-e-editor-bar-option {
+	margin-right: 5px;
+	cursor: pointer;
+}
+html[dir="ltr"] .r-e-editor-bar-options .r-e-editor-bar-option {
+	margin-right: 0;
+	margin-left: 5px;
+}
+.r-e-editor-bar-options .r-e-editor-bar-option button {
+	background-color: transparent;
+	outline: solid 0px #fff;
+	border: solid 0px #fff;
+	cursor: pointer;
+	font-weight: inherit;
+	padding: 0;
+}
+.r-e-editor-bar-options .r-e-editor-bar-option button.active {
+	color: blue;
+}
+/**/
+.r-e-editor-bar-floatin {
+	box-sizing: border-box;
+	width: 100%;
+	height: 50px;
+	background-color: #fff;
+	font-weight: bold;
+	box-shadow: 0 0 20px 1px #00000030;
+	position: absolute;
+	display: flex;
+	width: auto;
+	padding: 0 10px;
+}
