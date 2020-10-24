@@ -1,8 +1,31 @@
 
+
+class EventHandlerClass {
+  constructor() {
+    this.functionMap = {};
+  }
+
+  addEventListener(event, func) {
+    this.functionMap[event] = func;
+    document.addEventListener(event.split('.')[0], this.functionMap[event]);
+  }
+
+  removeEventListener(event) {
+    document.removeEventListener(event.split('.')[0], this.functionMap[event]);
+    delete this.functionMap[event];
+  }
+}
+
+EventHandler = new EventHandlerClass();
+
+
+
 class richEditor {
 
 	// 
 	constructor( settings ) {
+		// 
+		let _ = this;
 		// 
 		this.$el = settings.$el;
 		// 
@@ -157,16 +180,23 @@ class richEditor {
 		// 
 		this.convert();
 		// listen for selection changes
-		document.addEventListener('selectionchange', () => {
+		EventHandler.addEventListener('selectionchange.richEditor', () => {
 			// 
-			clearTimeout(this.delay);
+			this.selectActiveOptions();
 			// 
-			this.delay = setTimeout(()=>{
-				// 
-				this.selectActiveOptions();
-				// 
-				this.showFloatingBar();
-			},100);
+			this.showFloatingBar();
+		});
+		// listen for mouse move to caputre the corrdinates
+		EventHandler.addEventListener('mousedown.richEditor', ( e ) => {
+			// listen to mouse move
+			EventHandler.addEventListener('mousemove.richEditor', ( e ) => {
+				_.mouseX = e.clientX;
+				_.mouseY = e.clientY;
+			});
+			// stop listening to mouse move
+			EventHandler.addEventListener('mouseup.richEditor', ( e ) => {
+				EventHandler.removeEventListener('mousemove.richEditor');
+			});
 		});
 	}
 
@@ -275,8 +305,6 @@ class richEditor {
 			return;
 		}
 		// 
-		const coordinates = getSelectionCoordinates(slection);
-		// 
 		if ( !$floatingBar ) {
 			$floatingBar = document.createElement('div');
 			$floatingBar.id = 'floatingBar';
@@ -285,41 +313,8 @@ class richEditor {
 			document.body.appendChild($floatingBar);
 		}
 		// 
-		$floatingBar.style.top = (coordinates.top + 20) + 'px';
-		$floatingBar.style.left = coordinates.left + 'px';
-		// 
-
-		/**
-		 *
-		 */
-		function getSelectionCoordinates( slection ) {
-			//
-			let $anchore = document.getElementById('floatingBarOffset');
-			// 
-			if ( !$anchore ) {
-				//
-				$anchore = document.createElement('a');
-				// 
-				$anchore.id = 'floatingBarOffset';
-			}
-			// 
-			slection.getRangeAt(0).insertNode($anchore);
-			// 
-			return getOffset($anchore);
-		}
-
-		/**
-		 *
-		 */
-		function getOffset( el ) {
-			// 
-			const rect = el.getBoundingClientRect();
-			// 
-			return {
-				left: rect.left + window.scrollX,
-				top: rect.top + window.scrollY
-			};
-		}
+		$floatingBar.style.top = (this.mouseY + 10) + 'px';
+		$floatingBar.style.left = this.mouseX + 'px';
 	}
 
 	/**
