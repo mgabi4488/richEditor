@@ -1,31 +1,35 @@
-
+/**
+ * Rich Editor Tool:
+ * Istructions: https://github.com/mgabi4488/richEditor
+ */
 class richEditor extends EventHandler {
 
-	// 
+	/**
+	 * Initialize Class
+	 */
 	constructor( settings ) {
-		// 
+		// initialize the parent class
 		super();
-		// 
+		// get isntance
 		let _ = this;
 		// 
-		this.$el = settings.$el;
+		_.$el = settings.$el;
 		// 
-		this.$editor = document.createElement('div');
+		_.$editor = document.createElement('div');
 		// 
-		this.allOptions = ['superscript','subscript','italic','bold','underline','strikethrough','eraser','link'];
+		_.allOptions = ['superscript','subscript','italic','bold','underline','strikethrough','eraser','link'];
 		// 
-		this.hideOptions = Array.isArray(settings.hideOptions) ? settings.hideOptions : [];
+		_.hideOptions = Array.isArray(settings.hideOptions) ? settings.hideOptions : [];
 		// 
-		this.loadDependecies(() => {
+		_.loadDependecies(() => {
 			// 
-			this.convert();
-
+			_.convert();
 			// listen for selection changes
 			super.addEventListener(document,'selectionchange.richEditor', () => {
 				// 
-				this.selectActiveOptions();
+				_.selectActiveOptions();
 				// 
-				this.showFloatingBar();
+				_.showFloatingBar();
 			});
 			// listen for mouse move to caputre the corrdinates
 			super.addEventListener(document,'mousedown.richEditor', ( e ) => {
@@ -40,7 +44,23 @@ class richEditor extends EventHandler {
 				});
 			});
 		});
+		// 
+		_.addPublicObject();
 	}
+
+	/**
+	 *
+	 */
+	addPublicObject() {
+		this.$el.richEditor = {
+			$el: this.$el,
+			$editor: this.$editor,
+			getEditorContent: this.getEditorContent,
+			getContent: this.getContent,
+			save: this.save
+		};
+	}
+
 
 	/**
 	 *
@@ -51,6 +71,24 @@ class richEditor extends EventHandler {
 		let option = null;
 		let scripts = [];
 		let _ = this;
+		/**
+		 *
+		 */
+		let getScript = ( src ) => {
+			return new Promise(function(resolve, reject) {
+				// 
+				let script = document.createElement('script');
+				script.type = 'text/javascript';
+				script.src = src;
+				script.async = true;
+				// 
+				script.onload = ( event ) => {
+					resolve(script.src);
+				};
+				//
+				headTag.appendChild(script);
+			})
+		};
 		// 
 		for( let i = 0; i < this.allOptions.length; i++ ) {
 			// 
@@ -58,30 +96,20 @@ class richEditor extends EventHandler {
 			// 
 			if ( this.hideOptions.indexOf(option) != -1 ) continue;
 			// 
-			scripts.push(new Promise(function(resolve, reject) {
-				// 
-				let script = document.createElement('script');
-				script.type = 'text/javascript';
-				script.src = 'src/scripts/tools/'+[option]+'.js';
-				script.async = true;
-				// 
-				script.onload = ( event ) => {
-					//
-					let element = event.target;
-					let optionName = element.src.replace('.js','').split('/').pop();
-					let optionIndex = _.allOptions.indexOf(optionName);
-					let option = eval(optionName);
-					// 
-					_.allOptions[optionIndex] = new option();
-					// 
-					resolve(script.src);
-				};
-				//
-				headTag.appendChild(script);
-			}));
+			scripts.push(getScript('src/scripts/tools/'+option+'.js'));
 		}
 		// Usage:  Load different file types with one callback
 		Promise.all(scripts).then(function( resolved ) {
+			// 
+			for( let i = 0; i < resolved.length; i++ ) {
+				//
+				let optionName = resolved[i].replace('.js','').split('/').pop();
+				let optionIndex = _.allOptions.indexOf(optionName);
+				let option = eval(optionName);
+				// 
+				_.allOptions[optionIndex] = new option();
+			}
+			// 
 			if ( callBack ) callBack.call(this,true,resolved);
 		}).catch(function( rejected ) {
 			if ( callBack ) callBack.call(this,false,rejected);
@@ -228,5 +256,26 @@ class richEditor extends EventHandler {
 		const selection = window.getSelection();
 		selection.removeAllRanges();
 		selection.addRange(this.selecton);
+	}
+
+	/**
+	 *
+	 */
+	getEditorContent() {
+		return this.$editor.innerHTML;
+	}
+
+	/**
+	 *
+	 */
+	save() {
+		this.$el.value =  this.$editor.innerHTML;
+	}
+
+	/**
+	 *
+	 */
+	getContent() {
+		return this.$el.value;
 	}
 }
