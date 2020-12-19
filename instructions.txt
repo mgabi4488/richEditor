@@ -1,0 +1,5 @@
+1. npm init
+2. npm install webpack --save -dev
+3. package.json >> scripts >> add:
+	1. webpack {main js path} dist/boundle.js
+	2. npm run build

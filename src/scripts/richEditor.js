@@ -1,29 +1,10 @@
 
-
-class EventHandlerClass {
-  constructor() {
-    this.functionMap = {};
-  }
-
-  addEventListener(event, func) {
-    this.functionMap[event] = func;
-    document.addEventListener(event.split('.')[0], this.functionMap[event]);
-  }
-
-  removeEventListener(event) {
-    document.removeEventListener(event.split('.')[0], this.functionMap[event]);
-    delete this.functionMap[event];
-  }
-}
-
-EventHandler = new EventHandlerClass();
-
-
-
-class richEditor {
+class richEditor extends EventHandler {
 
 	// 
 	constructor( settings ) {
+		// 
+		super();
 		// 
 		let _ = this;
 		// 
@@ -31,201 +12,85 @@ class richEditor {
 		// 
 		this.$editor = document.createElement('div');
 		// 
-		this.allOptions = [{
-			text: '<i class="fas fa-superscript"></i>',
-			tag: 'sup',
-			action: () => {
-				// 
-				let selection = window.getSelection();
-				let range;
-				let documentFragment;
-				let newNode = document.createElement('sup');
-				// 
-				if ( selection.rangeCount ) {
-					// 
-					range = selection.getRangeAt(0);
-					// 
-					documentFragment = range.extractContents();
-					// 
-					newNode.appendChild(documentFragment);
-					//
-					range.insertNode(newNode);
-				}
-			}
-		},{
-			text: '<i class="fas fa-subscript"></i>',
-			tag: 'sub',
-			action: () => {
-				// 
-				let selection = window.getSelection();
-				let range;
-				let documentFragment;
-				let newNode = document.createElement('sub');
-				// 
-				if ( selection.rangeCount ) {
-					// 
-					range = selection.getRangeAt(0);
-					// 
-					documentFragment = range.extractContents();
-					// 
-					newNode.appendChild(documentFragment);
-					//
-					range.insertNode(newNode);
-				}
-			}
-		},{
-			text: '<i class="fas fa-italic"></i>',
-			tag: 'i',
-			action: () => {
-				// 
-				let selection = window.getSelection();
-				let range;
-				let documentFragment;
-				let newNode = document.createElement('i');
-				// 
-				if ( selection.rangeCount ) {
-					// 
-					range = selection.getRangeAt(0);
-					// 
-					documentFragment = range.extractContents();
-					// 
-					newNode.appendChild(documentFragment);
-					//
-					range.insertNode(newNode);
-				}
-			}
-		},{
-			text: '<i class="fas fa-bold"></i>',
-			tag: 'b',
-			action: () => {
-				// 
-				let selection = window.getSelection();
-				let range;
-				let documentFragment;
-				let newNode = document.createElement('b');
-				// 
-				if ( selection.rangeCount ) {
-					// 
-					range = selection.getRangeAt(0);
-					// 
-					documentFragment = range.extractContents();
-					// 
-					newNode.appendChild(documentFragment);
-					//
-					range.insertNode(newNode);
-				}
-			}
-		},{
-			text: '<i class="fas fa-underline"></i>',
-			tag: 'u',
-			action: () => {
-				// 
-				let selection = window.getSelection();
-				let range;
-				let documentFragment;
-				let newNode = document.createElement('u');
-				// 
-				if ( selection.rangeCount ) {
-					// 
-					range = selection.getRangeAt(0);
-					// 
-					documentFragment = range.extractContents();
-					// 
-					newNode.appendChild(documentFragment);
-					//
-					range.insertNode(newNode);
-				}
-			},
-		},{
-			text: '<i class="fas fa-strikethrough"></i>',
-			tag: 's',
-			action: () => {
-				// 
-				let selection = window.getSelection();
-				let range;
-				let documentFragment;
-				let newNode = document.createElement('s');
-				// 
-				if ( selection.rangeCount ) {
-					// 
-					range = selection.getRangeAt(0);
-					// 
-					documentFragment = range.extractContents();
-					// 
-					newNode.appendChild(documentFragment);
-					//
-					range.insertNode(newNode);
-				}
-			}
-		},{
-			text: '<i class="fas fa-eraser"></i>',
-			tag: '',
-			action: () => {
-				// 
-				let selection = window.getSelection();
-				let range;
-				let selectedText = window.getSelection().toString();
-				let newNode = document.createTextNode(selectedText);
-				// 
-				if ( selection.rangeCount ) {
-					// 
-					range = selection.getRangeAt(0);
-					//
-					range.deleteContents();
-					// 
-					range.insertNode(newNode);
-				}
-			}
-		},{
-			text: '<i class="fas fa-link"></i>',
-			tag: '',
-			action: () => {
-				// 
-				let selection = window.getSelection();
-				let range;
-				let documentFragment;
-				let newNode = document.createElement('a');
-				// 
-				newNode.setAttribute('href','https://www.google.com/');
-				// 
-				newNode.setAttribute('target','_blank');
-				// 
-				if ( selection.rangeCount ) {
-					// 
-					range = selection.getRangeAt(0);
-					// 
-					documentFragment = range.extractContents();
-					// 
-					newNode.appendChild(documentFragment);
-					//
-					range.insertNode(newNode);
-				}
-			}
-		}];
+		this.allOptions = ['superscript','subscript','italic','bold','underline','strikethrough','eraser','link'];
 		// 
-		this.convert();
-		// listen for selection changes
-		EventHandler.addEventListener('selectionchange.richEditor', () => {
+		this.hideOptions = Array.isArray(settings.hideOptions) ? settings.hideOptions : [];
+		// 
+		this.loadDependecies(() => {
 			// 
-			this.selectActiveOptions();
-			// 
-			this.showFloatingBar();
-		});
-		// listen for mouse move to caputre the corrdinates
-		EventHandler.addEventListener('mousedown.richEditor', ( e ) => {
-			// listen to mouse move
-			EventHandler.addEventListener('mousemove.richEditor', ( e ) => {
-				_.mouseX = e.clientX;
-				_.mouseY = e.clientY;
+			this.convert();
+
+			// listen for selection changes
+			super.addEventListener(document,'selectionchange.richEditor', () => {
+				// 
+				this.selectActiveOptions();
+				// 
+				this.showFloatingBar();
 			});
-			// stop listening to mouse move
-			EventHandler.addEventListener('mouseup.richEditor', ( e ) => {
-				EventHandler.removeEventListener('mousemove.richEditor');
+			// listen for mouse move to caputre the corrdinates
+			super.addEventListener(document,'mousedown.richEditor', ( e ) => {
+				// listen to mouse move
+				super.addEventListener(document,'mousemove.richEditor', ( e ) => {
+					_.mouseX = e.clientX;
+					_.mouseY = e.clientY;
+				});
+				// stop listening to mouse move
+				super.addEventListener(document,'mouseup.richEditor', ( e ) => {
+					super.removeEventListener(document,'mousemove.richEditor');
+				});
 			});
 		});
 	}
 
-	//
+	/**
+	 *
+	 */
+	loadDependecies( callBack ) {
+		// 
+		let headTag = document.querySelector('head');
+		let option = null;
+		let scripts = [];
+		let _ = this;
+		// 
+		for( let i = 0; i < this.allOptions.length; i++ ) {
+			// 
+			option = this.allOptions[i];
+			// 
+			if ( this.hideOptions.indexOf(option) != -1 ) continue;
+			// 
+			scripts.push(new Promise(function(resolve, reject) {
+				// 
+				let script = document.createElement('script');
+				script.type = 'text/javascript';
+				script.src = 'src/scripts/tools/'+[option]+'.js';
+				script.async = true;
+				// 
+				script.onload = ( event ) => {
+					//
+					let element = event.target;
+					let optionName = element.src.replace('.js','').split('/').pop();
+					let optionIndex = _.allOptions.indexOf(optionName);
+					let option = eval(optionName);
+					// 
+					_.allOptions[optionIndex] = new option();
+					// 
+					resolve(script.src);
+				};
+				//
+				headTag.appendChild(script);
+			}));
+		}
+		// Usage:  Load different file types with one callback
+		Promise.all(scripts).then(function( resolved ) {
+			if ( callBack ) callBack.call(this,true,resolved);
+		}).catch(function( rejected ) {
+			if ( callBack ) callBack.call(this,false,rejected);
+		});
+	}
+
+	/**
+	 *
+	 */
 	convert() {
 		// get objects
 		let $elParent = this.$el.parentNode;
@@ -255,28 +120,31 @@ class richEditor {
 	getOptions() {
 		// 
 		const $options = document.createElement('ul');
+		let _ = this;
 		$options.classList.add('r-e-editor-bar-options');
 		// 
 		for ( let i = 0; i < this.allOptions.length; i++ ) {
+			// 
+			if ( this.hideOptions.indexOf(this.allOptions[i]) != -1 ) continue;
 			// 
 			let $option = document.createElement('li');
 			this.allOptions[i].$button = document.createElement('button');
 			this.allOptions[i].$button.innerHTML = this.allOptions[i].text;
 			$option.setAttribute('data-index',i);
-
+			// 
 			$option.classList.add('r-e-editor-bar-option');
 			// 
-			this.allOptions[i].$button.addEventListener('click', ( event ) => {
+			super.addEventListener(this.allOptions[i].$button,'click', ( event ) => {
 				// 
 				let $clickedBtn = event.target.parentNode;
 				// 
 				let index = $clickedBtn.parentNode.getAttribute('data-index');
 				// 
-				this.saveSelection();
+				_.saveSelection();
 				// 
-				this.allOptions[index].action();
+				_.allOptions[index].action();
 				// 
-				this.restoreSelection();
+				_.restoreSelection();
 			});
 			// 
 			$option.appendChild(this.allOptions[i].$button);
@@ -292,6 +160,8 @@ class richEditor {
 		let editorTags = {};
 		// 
 		for ( let i = 0; i < this.allOptions.length; i++ ) {
+			// 
+			if ( this.hideOptions.indexOf(this.allOptions[i]) != -1 ) continue;
 			// 
 			if ( this.allOptions[i].tag == '' ) continue;
 			// 
@@ -349,7 +219,7 @@ class richEditor {
 	saveSelection() {
 		const selection = window.getSelection();
 		this.selecton = selection.rangeCount === 0 ? null : selection.getRangeAt(0);
-	};
+	}
 
 	/**
 	 * Restore the selection `range` is a `Range` object
@@ -358,6 +228,5 @@ class richEditor {
 		const selection = window.getSelection();
 		selection.removeAllRanges();
 		selection.addRange(this.selecton);
-	};
-
+	}
 }
